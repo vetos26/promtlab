@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.promtlab.app.ui.theme.AccentPalette
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +25,8 @@ data class AppSettings(
     val accent: AccentPalette = AccentPalette.VIOLET,
     val dynamicColor: Boolean = false,
     val showTokenCounter: Boolean = true,
-    val defaultLanguage: String = "Русский"
+    val defaultLanguage: String = "Русский",
+    val completedLessons: Set<String> = emptySet()
 )
 
 class SettingsRepository(context: Context) {
@@ -41,7 +43,8 @@ class SettingsRepository(context: Context) {
             } ?: AccentPalette.VIOLET,
             dynamicColor = prefs[KEY_DYNAMIC] ?: false,
             showTokenCounter = prefs[KEY_TOKENS] ?: true,
-            defaultLanguage = prefs[KEY_LANGUAGE] ?: "Русский"
+            defaultLanguage = prefs[KEY_LANGUAGE] ?: "Русский",
+            completedLessons = prefs[KEY_LESSONS] ?: emptySet()
         )
     }
 
@@ -65,11 +68,19 @@ class SettingsRepository(context: Context) {
         dataStore.edit { it[KEY_LANGUAGE] = language }
     }
 
+    suspend fun toggleLessonCompleted(id: String) {
+        dataStore.edit { prefs ->
+            val current = prefs[KEY_LESSONS] ?: emptySet()
+            prefs[KEY_LESSONS] = if (id in current) current - id else current + id
+        }
+    }
+
     private companion object {
         val KEY_THEME = stringPreferencesKey("theme_mode")
         val KEY_ACCENT = stringPreferencesKey("accent")
         val KEY_DYNAMIC = booleanPreferencesKey("dynamic_color")
         val KEY_TOKENS = booleanPreferencesKey("show_tokens")
         val KEY_LANGUAGE = stringPreferencesKey("default_language")
+        val KEY_LESSONS = stringSetPreferencesKey("completed_lessons")
     }
 }

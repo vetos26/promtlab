@@ -1,4 +1,4 @@
-package com.promtlab.app.ui.screens.history
+package com.promtlab.app.ui.screens.favorites
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.SearchOff
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,18 +25,31 @@ import com.promtlab.app.ui.components.PromptItemCard
 import com.promtlab.app.ui.components.ScreenHeader
 import com.promtlab.app.ui.components.SearchField
 
+/**
+ * Сохранённые промты: по умолчанию показаны избранные,
+ * переключатель открывает всю коллекцию.
+ */
 @Composable
-fun HistoryScreen(
+fun FavoritesScreen(
     viewModel: AppViewModel,
     onOpenPrompt: (Long) -> Unit,
     onCreatePrompt: () -> Unit
 ) {
-    val prompts by viewModel.filteredPrompts.collectAsStateWithLifecycle()
-    val allPrompts by viewModel.savedPrompts.collectAsStateWithLifecycle()
-    val query by viewModel.searchQuery.collectAsStateWithLifecycle()
-    val favoritesOnly by viewModel.favoritesOnly.collectAsStateWithLifecycle()
+    val prompts by viewModel.savedPrompts.collectAsStateWithLifecycle()
+    var query by remember { mutableStateOf("") }
+    var favoritesOnly by remember { mutableStateOf(true) }
 
-    val favoritesCount = allPrompts.count { it.isFavorite }
+    val favoritesCount = prompts.count { it.isFavorite }
+    val visible = remember(prompts, query, favoritesOnly) {
+        prompts.filter { prompt ->
+            val matchesFilter = !favoritesOnly || prompt.isFavorite
+            val matchesQuery = query.isBlank() ||
+                prompt.title.contains(query, ignoreCase = true) ||
+                prompt.body.contains(query, ignoreCase = true) ||
+                prompt.category.label.contains(query, ignoreCase = true)
+            matchesFilter && matchesQuery
+        }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -42,42 +58,43 @@ fun HistoryScreen(
     ) {
         item {
             ScreenHeader(
-                title = "История",
-                subtitle = if (allPrompts.isEmpty()) {
-                    "Сохраняйте удачные промты, чтобы переиспользовать"
+                title = "Избранное",
+                subtitle = if (prompts.isEmpty()) {
+                    "Сохраняйте промты — они появятся здесь"
                 } else {
-                    "Сохранено ${allPrompts.size} · в избранном $favoritesCount"
+                    "В избранном $favoritesCount · всего сохранено ${prompts.size}"
                 }
             )
         }
         item {
             SearchField(
                 value = query,
-                onValueChange = viewModel::setSearchQuery,
+                onValueChange = { query = it },
                 placeholder = "Поиск по названию, тексту или категории"
             )
         }
         item {
             ChoiceChips(
-                options = listOf(false, true),
+                options = listOf(true, false),
                 selected = favoritesOnly,
                 label = { if (it) "Избранное" else "Все промты" },
-                onSelect = viewModel::setFavoritesOnly
+                onSelect = { favoritesOnly = it }
             )
         }
 
         when {
-            allPrompts.isEmpty() -> item {
+            prompts.isEmpty() -> item {
                 EmptyState(
-                    icon = Icons.Rounded.History,
-                    title = "История пока пуста",
-                    message = "Соберите промт в конструкторе и нажмите «Сохранить» — он появится здесь.",
+                    icon = Icons.Rounded.Star,
+                    title = "Пока ничего не сохранено",
+                    message = "Соберите промт в генераторе и нажмите «Сохранить» — " +
+                        "он появится здесь.",
                     actionLabel = "Создать промт",
                     onAction = onCreatePrompt
                 )
             }
 
-            prompts.isEmpty() -> item {
+            visible.isEmpty() -> item {
                 EmptyState(
                     icon = Icons.Rounded.SearchOff,
                     title = "Ничего не найдено",
@@ -88,8 +105,8 @@ fun HistoryScreen(
                     },
                     actionLabel = "Сбросить фильтры",
                     onAction = {
-                        viewModel.setSearchQuery("")
-                        viewModel.setFavoritesOnly(false)
+                        query = ""
+                        favoritesOnly = false
                     }
                 )
             }
@@ -97,12 +114,12 @@ fun HistoryScreen(
             else -> {
                 item {
                     Text(
-                        text = "Показано ${prompts.size}",
+                        text = "Показано ${visible.size}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                items(items = prompts, key = { it.id }) { prompt ->
+                items(items = visible, key = { it.id }) { prompt ->
                     PromptItemCard(
                         prompt = prompt,
                         onClick = { onOpenPrompt(prompt.id) },

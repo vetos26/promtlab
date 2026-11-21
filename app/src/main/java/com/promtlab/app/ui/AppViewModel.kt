@@ -4,8 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.promtlab.app.Graph
+import com.promtlab.app.data.ImagePromptGenerator
 import com.promtlab.app.data.PromptGenerator
+import com.promtlab.app.data.model.GeneratedImagePrompt
 import com.promtlab.app.data.model.GeneratedPrompt
+import com.promtlab.app.data.model.ImagePromptForm
 import com.promtlab.app.data.model.PromptCategory
 import com.promtlab.app.data.model.PromptForm
 import com.promtlab.app.data.model.PromptTemplate
@@ -40,6 +43,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _form = MutableStateFlow(PromptForm())
     val form: StateFlow<PromptForm> = _form.asStateFlow()
 
+    /** Счётчики для меню: сколько сохранено и сколько в избранном. */
     val generated: StateFlow<GeneratedPrompt> = _form
         .map { PromptGenerator.build(it) }
         .stateIn(
@@ -53,6 +57,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun applyTemplate(template: PromptTemplate) {
+        _generatorMode.value = GeneratorMode.TEXT
         _form.value = template.preset
         showMessage("Шаблон «${template.title}» применён")
     }
@@ -67,6 +72,62 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         showMessage("Конструктор очищен")
     }
 
+    /* -------------------- Режим: текст / изображение --------------------- */
+
+    private val _generatorMode = MutableStateFlow(GeneratorMode.TEXT)
+    val generatorMode: StateFlow<GeneratorMode> = _generatorMode.asStateFlow()
+
+    fun setGeneratorMode(mode: GeneratorMode) {
+        if (_generatorMode.value != mode) {
+            _generatorMode.value = mode
+        }
+    }
+
+    /* ---------------------- Генератор изображений ----------------------- */
+
+    private val _imageForm = MutableStateFlow(ImagePromptForm())
+    val imageForm: StateFlow<ImagePromptForm> = _imageForm.asStateFlow()
+
+    val generatedImage: StateFlow<GeneratedImagePrompt> = _imageForm
+        .map { ImagePromptGenerator.build(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ImagePromptGenerator.build(_imageForm.value)
+        )
+
+    fun updateImageForm(transform: (ImagePromptForm) -> ImagePromptForm) {
+        _imageForm.value = transform(_imageForm.value)
+    }
+
+    fun randomizeImage() {
+        _imageForm.value = ImagePromptGenerator.randomForm()
+        showMessage("Идея для изображения подставлена")
+    }
+
+    fun resetImageForm() {
+        _imageForm.value = ImagePromptForm()
+        showMessage("Конструктор изображений очищен")
+    }
+
+    fun saveImagePrompt(title: String) {
+        val generated = generatedImage.value
+        val target = _imageForm.value.target
+        viewModelScope.launch {
+            repository.save(
+                SavedPrompt(
+                    title = title.trim().ifBlank { titleFromPrompt(generated.english) },
+                    body = generated.fullText,
+                    category = PromptCategory.DESIGN,
+                    tone = "Визуальный",
+                    format = target.shortLabel,
+                    createdAt = System.currentTimeMillis()
+                )
+            )
+            showMessage("Промт для изображения сохранён")
+        }
+    }
+
     /* ------------------------------- История ------------------------------ */
 
     val savedPrompts: StateFlow<List<SavedPrompt>> = repository.observeAll()
@@ -75,6 +136,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    /** Счётчики для меню: сколько сохранено и сколько в избранном. */
+    val counts: StateFlow<Pair<Int, Int>> = savedPrompts
+        .map { list -> list.size to list.count { it.isFavorite } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0 to 0)
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -184,6 +250,28 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setShowTokenCounter(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setShowTokenCounter(enabled) }
+    }
+
+    fun saveTextPrompt(title: String, category: PromptCategory) {
+        val generated = generated.value
+        val form = _form.value
+        viewModelScope.launch {
+            repository.save(
+                SavedPrompt(
+                    title = title.trim().ifBlank { titleFromPrompt(generated.text) },
+                    body = generated.text,
+                    category = category,
+                    tone = form.tone.label,
+                    format = form.format.label,
+                    createdAt = System.currentTimeMillis()
+                )
+            )
+            showMessage("Промт сохранён в избранное")
+        }
+    }
+
+    fun toggleLessonCompleted(id: String) {
+        viewModelScope.launch { settingsRepository.toggleLessonCompleted(id) }
     }
 
     /* ------------------------------- События ------------------------------ */

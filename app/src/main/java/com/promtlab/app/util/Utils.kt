@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -23,6 +24,11 @@ fun Context.shareText(text: String, subject: String = "Промт из PromtLab"
         putExtra(Intent.EXTRA_TEXT, text)
     }
     startActivity(Intent.createChooser(intent, "Поделиться промтом"))
+}
+
+fun Context.openUrl(url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    runCatching { startActivity(intent) }
 }
 
 fun formatDate(millis: Long): String = dateFormat.format(Date(millis))

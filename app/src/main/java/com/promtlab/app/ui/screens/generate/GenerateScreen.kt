@@ -1,27 +1,22 @@
 package com.promtlab.app.ui.screens.generate
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
@@ -30,16 +25,14 @@ import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.Casino
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,9 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,25 +53,157 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.promtlab.app.data.model.AnswerLength
 import com.promtlab.app.data.model.OutputFormat
-import com.promtlab.app.data.model.PromptCategory
 import com.promtlab.app.data.model.PromptForm
 import com.promtlab.app.data.model.PromptLanguage
 import com.promtlab.app.data.model.Technique
 import com.promtlab.app.data.model.Tone
 import com.promtlab.app.ui.AppViewModel
+import com.promtlab.app.ui.GeneratorMode
 import com.promtlab.app.ui.components.ChoiceChips
+import com.promtlab.app.ui.components.CircleActionButton
 import com.promtlab.app.ui.components.GradientButton
+import com.promtlab.app.ui.components.GradientIconButton
 import com.promtlab.app.ui.components.InfoPill
 import com.promtlab.app.ui.components.LabeledField
 import com.promtlab.app.ui.components.MultiChoiceChips
+import com.promtlab.app.ui.components.QualityCard
+import com.promtlab.app.ui.components.SavePromptDialog
 import com.promtlab.app.ui.components.ScreenHeader
 import com.promtlab.app.ui.components.SectionCard
 import com.promtlab.app.util.copyToClipboard
 import com.promtlab.app.util.shareText
 import com.promtlab.app.util.titleFromPrompt
 
+/**
+ * Единый экран генератора: текстовые промты и промты для изображений
+ * переключаются сегментом в верхней части экрана.
+ */
 @Composable
 fun GenerateScreen(viewModel: AppViewModel) {
+    val mode by viewModel.generatorMode.collectAsStateWithLifecycle()
+
+    val onRandomize = {
+        if (mode == GeneratorMode.IMAGE) viewModel.randomizeImage() else viewModel.randomize()
+    }
+    val onReset = {
+        if (mode == GeneratorMode.IMAGE) viewModel.resetImageForm() else viewModel.resetForm()
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+        ) {
+            ScreenHeader(
+                title = "Создать промт",
+                subtitle = when (mode) {
+                    GeneratorMode.TEXT -> "Текст: роль модели, задача и приёмы"
+                    GeneratorMode.IMAGE -> "Изображение: сюжет, стиль, свет и параметры"
+                },
+                action = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        CircleActionButton(
+                            icon = Icons.Rounded.Refresh,
+                            contentDescription = "Очистить",
+                            onClick = onReset,
+                            size = 48
+                        )
+                        GradientIconButton(
+                            icon = Icons.Rounded.Casino,
+                            contentDescription = "Случайная идея",
+                            onClick = onRandomize,
+                            size = 48
+                        )
+                    }
+                }
+            )
+            Spacer(Modifier.size(14.dp))
+            ModeSwitcher(
+                mode = mode,
+                onModeChange = viewModel::setGeneratorMode
+            )
+            Spacer(Modifier.size(6.dp))
+        }
+
+        when (mode) {
+            GeneratorMode.TEXT -> TextPromptPane(
+                viewModel = viewModel,
+                modifier = Modifier.weight(1f)
+            )
+
+            GeneratorMode.IMAGE -> ImagePromptPane(
+                viewModel = viewModel,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ModeSwitcher(
+    mode: GeneratorMode,
+    onModeChange: (GeneratorMode) -> Unit
+) {
+    val cs = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(cs.surfaceContainerHigh)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        GeneratorMode.entries.forEach { item ->
+            val selected = item == mode
+            val pillColor by animateColorAsState(
+                targetValue = if (selected) cs.primaryContainer else Color.Transparent,
+                label = "modePill"
+            )
+            val contentColor by animateColorAsState(
+                targetValue = if (selected) cs.onPrimaryContainer else cs.onSurfaceVariant,
+                label = "modeContent"
+            )
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(pillColor)
+                    .clickable { onModeChange(item) }
+                    .padding(vertical = 10.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = if (item == GeneratorMode.TEXT) {
+                        Icons.Rounded.AutoAwesome
+                    } else {
+                        Icons.Rounded.Image
+                    },
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(17.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = item.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = contentColor
+                )
+            }
+        }
+    }
+}
+
+/* ------------------------------------------------------------------------ */
+/*                          Режим «Текст»                                   */
+/* ------------------------------------------------------------------------ */
+
+@Composable
+fun TextPromptPane(
+    viewModel: AppViewModel,
+    modifier: Modifier = Modifier
+) {
     val form by viewModel.form.collectAsStateWithLifecycle()
     val generated by viewModel.generated.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -94,24 +217,17 @@ fun GenerateScreen(viewModel: AppViewModel) {
             defaultTitle = titleFromPrompt(generated.text),
             onDismiss = { showSaveDialog = false },
             onConfirm = { title, category ->
-                viewModel.saveCurrent(title, category)
+                viewModel.saveTextPrompt(title, category)
                 showSaveDialog = false
             }
         )
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 28.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            GenerateHeader(
-                onRandomize = viewModel::randomize,
-                onReset = viewModel::resetForm
-            )
-        }
-
         item {
             QualityCard(score = generated.score, hints = generated.hints)
         }
@@ -216,7 +332,9 @@ fun GenerateScreen(viewModel: AppViewModel) {
                 ConstraintSuggestions(
                     onPick = { constraint ->
                         viewModel.updateForm { current ->
-                            current.copy(constraints = appendConstraint(current.constraints, constraint))
+                            current.copy(
+                                constraints = appendConstraint(current.constraints, constraint)
+                            )
                         }
                     }
                 )
@@ -246,7 +364,7 @@ fun GenerateScreen(viewModel: AppViewModel) {
                     label = { it.label },
                     onToggle = { technique ->
                         viewModel.updateForm { current ->
-                            current.copy(techniques = toggle(current.techniques, technique))
+                            current.copy(techniques = toggleTechnique(current.techniques, technique))
                         }
                     }
                 )
@@ -254,7 +372,7 @@ fun GenerateScreen(viewModel: AppViewModel) {
         }
 
         item {
-            PreviewCard(
+            TextPreviewCard(
                 form = form,
                 text = generated.text,
                 chars = generated.chars,
@@ -279,129 +397,6 @@ fun GenerateScreen(viewModel: AppViewModel) {
 /* ------------------------------------------------------------------------ */
 /*                              Вспомогательные                             */
 /* ------------------------------------------------------------------------ */
-
-@Composable
-private fun GenerateHeader(onRandomize: () -> Unit, onReset: () -> Unit) {
-    ScreenHeader(
-        title = "PromtLab",
-        subtitle = "Конструктор промтов для промт-инженера",
-        action = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CircleActionButton(
-                    icon = Icons.Rounded.Refresh,
-                    contentDescription = "Очистить конструктор",
-                    onClick = onReset
-                )
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.tertiary
-                                )
-                            )
-                        )
-                        .clickable(onClick = onRandomize),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Casino,
-                        contentDescription = "Случайная идея",
-                        tint = Color.White,
-                        modifier = Modifier.size(23.dp)
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun QualityCard(score: Int, hints: List<String>) {
-    val cs = MaterialTheme.colorScheme
-    val scoreColor = when {
-        score >= 75 -> cs.primary
-        score >= 45 -> cs.tertiary
-        else -> cs.error
-    }
-    val label = when {
-        score >= 85 -> "Готов к работе"
-        score >= 60 -> "Хороший черновик"
-        score >= 35 -> "Есть что усилить"
-        else -> "Начните с задачи"
-    }
-
-    SectionCard(title = "Качество промта", icon = Icons.Rounded.TrendingUp) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "$score%",
-                style = MaterialTheme.typography.headlineSmall,
-                color = scoreColor
-            )
-            Spacer(Modifier.width(10.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = cs.onSurfaceVariant,
-                modifier = Modifier.weight(1f)
-            )
-            InfoPill(text = "live", icon = Icons.Rounded.Bolt)
-        }
-        ScoreBar(score = score)
-        if (hints.isEmpty()) {
-            Text(
-                text = "Роль, задача, контекст и ограничения на месте — можно отправлять модели.",
-                style = MaterialTheme.typography.bodySmall,
-                color = cs.onSurfaceVariant
-            )
-        } else {
-            hints.take(3).forEach { hint ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(cs.primary.copy(alpha = 0.65f))
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = hint,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = cs.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ScoreBar(score: Int) {
-    val fraction by animateFloatAsState(
-        targetValue = score / 100f,
-        animationSpec = tween(550),
-        label = "scoreFraction"
-    )
-    val cs = MaterialTheme.colorScheme
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(10.dp)
-            .clip(CircleShape)
-            .background(cs.surfaceContainerHighest)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(fraction)
-                .clip(CircleShape)
-                .background(Brush.horizontalGradient(listOf(cs.primary, cs.tertiary)))
-        )
-    }
-}
 
 @Composable
 private fun RoleSuggestions(onPick: (String) -> Unit) {
@@ -459,7 +454,7 @@ private fun FieldLabel(text: String) {
 }
 
 @Composable
-private fun PreviewCard(
+private fun TextPreviewCard(
     form: PromptForm,
     text: String,
     chars: Int,
@@ -536,80 +531,9 @@ private fun PreviewCard(
     }
 }
 
-@Composable
-private fun CircleActionButton(
-    icon: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
-    val cs = MaterialTheme.colorScheme
-    Box(
-        modifier = Modifier
-            .size(54.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(cs.surfaceContainerHigh)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = cs.primary,
-            modifier = Modifier.size(22.dp)
-        )
-    }
-}
-
-@Composable
-private fun SavePromptDialog(
-    defaultTitle: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String, PromptCategory) -> Unit
-) {
-    var title by remember { mutableStateOf(defaultTitle) }
-    var category by remember { mutableStateOf(PromptCategory.WRITING) }
-    val cs = MaterialTheme.colorScheme
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(26.dp),
-        containerColor = cs.surfaceContainerHigh,
-        title = { Text("Сохранить промт") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Название") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                FieldLabel("КАТЕГОРИЯ")
-                ChoiceChips(
-                    options = PromptCategory.entries,
-                    selected = category,
-                    label = { it.label },
-                    onSelect = { category = it }
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(title, category) }) {
-                Text("Сохранить")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Отмена")
-            }
-        }
-    )
-}
-
 /* ------------------------------ Утилиты формы ---------------------------- */
 
-private fun toggle(set: Set<Technique>, technique: Technique): Set<Technique> =
+private fun toggleTechnique(set: Set<Technique>, technique: Technique): Set<Technique> =
     if (technique in set) set - technique else set + technique
 
 private fun appendConstraint(current: String, constraint: String): String {
