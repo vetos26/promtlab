@@ -70,21 +70,22 @@ sealed class Dest(
     )
 
     companion object {
-        /** Пункты выдвижного меню по порядку. */
-        val items: List<Dest> = listOf(
-            Generate,
-            Image,
-            Templates,
-            Favorites,
-            Learn,
-            Settings,
-            About
-        )
+        /**
+         * Пункты выдвижного меню по порядку.
+         *
+         * Важно: список ленивый. Если обращаться к синглтонам внутри инициализации
+         * класса [Dest], их статические поля ещё null — получается
+         * NullPointerException в <clinit> и мгновенное падение при запуске.
+         */
+        val items: List<Dest>
+            get() = listOf(Generate, Image, Templates, Favorites, Learn, Settings, About)
 
         /** Уникальные маршруты (Generate и Image делят один экран). */
-        val routes: List<String> = items.map { it.route }.distinct()
+        val routes: List<String>
+            get() = items.map { it.route }.distinct()
 
         const val PROMPT_DETAIL_ROUTE = "prompt/{promptId}"
+
         fun promptDetail(id: Long): String = "prompt/$id"
     }
 }
