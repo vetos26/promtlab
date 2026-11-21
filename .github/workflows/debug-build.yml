@@ -24,13 +24,19 @@ jobs:
           ./gradlew :app:assembleDebug :app:testDebugUnitTest --continue --console=plain > build.log 2>&1
           code=$?
           echo "GRADLE_EXIT=$code"
-          {
-            echo "### Build diagnostics (exit $code)"
-            echo '```'
-            grep -nE "^e: |error:|FAILED|Execution failed|> Task .*FAILED|Test.*FAILED|Caused by" build.log | head -80 || true
-            echo '```'
-          } > diagnostics.md
-          cat diagnostics.md
+          python3 - <<'PY' || true
+          import re
+          lines = []
+          for raw in open("build.log", encoding="utf-8", errors="replace"):
+              line = raw.rstrip()
+              if re.search(r"^e: |error:|FAILED|Execution failed|^> Task .*FAILED|Test.*failed", line):
+                  lines.append(line.strip())
+          # переносим ошибки в аннотации (их читает агент через API)
+          for line in lines[:12]:
+              msg = line.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print(f"::error title=diag::{msg[:900]}")
+          print(f"::error title=diag-count::{len(lines)} error lines")
+          PY
           exit $code
       - name: Publish diagnostics
         if: always()
