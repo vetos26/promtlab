@@ -25,18 +25,39 @@ jobs:
           code=$?
           echo "GRADLE_EXIT=$code"
           python3 - <<'PY' || true
-          import re
-          text = open("build.log", encoding="utf-8", errors="replace").read()
-          lines = [l.strip() for l in text.splitlines()
-                   if re.search(r"(^e: |^w: .*\.kt|error:|FAILED|Caused by|Exception in|at com\.promtlab)", l)]
-          uniq = []
-          for line in lines:
-              if line not in uniq:
-                  uniq.append(line)
-          for line in uniq[:18]:
-              msg = line.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-              print(f"::error title=startup::{msg[:900]}")
-          print(f"::error title=startup-count::{len(uniq)} diagnostic lines")
+          import glob, re, textwrap
+          import xml.etree.ElementTree as ET
+
+          messages = []
+          # JUnit XML содержит полный текст исключения
+          for path in glob.glob("app/build/test-results/**/*.xml", recursive=True):
+              try:
+                  root = ET.parse(path).getroot()
+              except Exception:
+                  continue
+              for case in root.iter("testcase"):
+                  for tag in ("failure", "error"):
+                      node = case.find(tag)
+                      if node is not None:
+                          text = (node.get("message") or "") + "\n" + (node.text or "")
+                          head = [c for c in text.splitlines()
+                                  if c.strip() and not c.strip().startswith("at ")]
+                          tail = [c for c in text.splitlines() if c.strip().startswith("at com.promtlab")][:4]
+                          messages.append(f"{case.get('classname')}.{case.get('name')}: " +
+                                          " | ".join(head[:3] + tail))
+          if not messages:
+              text = open("build.log", encoding="utf-8", errors="replace").read()
+              for line in text.splitlines():
+                  if re.search(r"(^e: |error:|FAILED|Caused by)", line):
+                      messages.append(line.strip())
+          seen = []
+          for item in messages:
+              if item not in seen:
+                  seen.append(item)
+          for item in seen[:10]:
+              msg = item.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print(f"::error title=startup::{msg[:1400]}")
+          print(f"::error title=startup-count::{len(seen)} failures")
           PY
           exit $code
       - name: Upload test reports

@@ -45,6 +45,13 @@ class AppStartupTest {
     }
 
     @Test
+    fun settingsFlowStartsWithDefaults() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val repository = Graph.settingsRepository(app)
+        assertNotNull(repository)
+    }
+
+    @Test
     fun generatorsProduceContentOnColdStart() {
         val textPrompt = PromptGenerator.build(PromptForm())
         assertTrue(textPrompt.text.isNotBlank())
