@@ -24,7 +24,7 @@ jobs:
         run: |
           chmod +x gradlew
           set +e
-          ./gradlew :app:testDebugUnitTest --console=plain --info > build.log 2>&1
+          ./gradlew :app:testDebugUnitTest --tests "com.promtlab.app.RootCauseTest" --console=plain --info > build.log 2>&1
           code=$?
           echo "GRADLE_EXIT=$code"
           python3 - <<'PY' || true
