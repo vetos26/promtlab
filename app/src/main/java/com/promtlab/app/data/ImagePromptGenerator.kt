@@ -116,8 +116,11 @@ object ImagePromptGenerator {
         if (form.subject.isBlank()) add("Опишите главный объект кадра — без него промт размытый")
         if (form.details.isBlank()) add("Добавьте детали: материалы, окружение, время суток")
         if (form.negatives.isBlank()) add("Заполните negative prompt — уберёт артефакты и текст")
-        if (form.tokens > 220) add("Промт длинный: сократите второстепенные детали")
-        if (form.subject.split(" ").size > 30) add("Сюжет слишком длинный: оставьте 1 главный объект")
+        val words = form.subject.trim().split(" ").count { it.isNotBlank() }
+        if (words > 30) add("Сюжет слишком длинный: оставьте 1 главный объект")
+        if (form.subject.length + form.details.length > 420) {
+            add("Промт длинный: сократите второстепенные детали")
+        }
     }
 
     val presets: List<ImagePreset> = listOf(
