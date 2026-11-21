@@ -1,6 +1,6 @@
 package com.promtlab.app
 
-import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
@@ -44,7 +44,7 @@ class ScreensRenderTest {
                 PromtLabApp(viewModel = viewModel)
             }
         }
-        composeRule.onNodeWithText("Создать промт").assertExists()
+        composeRule.onNodeWithText("Создать промт").assertIsDisplayed()
     }
 
     @Test
@@ -52,8 +52,8 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { GenerateScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("Создать промт").assertExists()
-        composeRule.onNodeWithText("Качество промта").assertExists()
+        composeRule.onNodeWithText("Создать промт").assertIsDisplayed()
+        composeRule.onNodeWithText("Качество промта").assertIsDisplayed()
     }
 
     @Test
@@ -63,7 +63,7 @@ class ScreensRenderTest {
                 TemplatesScreen(viewModel = viewModel, onTemplateApplied = {})
             }
         }
-        composeRule.onNodeWithText("Шаблоны").assertExists()
+        composeRule.onNodeWithText("Шаблоны").assertIsDisplayed()
     }
 
     @Test
@@ -77,7 +77,7 @@ class ScreensRenderTest {
                 )
             }
         }
-        composeRule.onNodeWithText("Избранное").assertExists()
+        composeRule.onNodeWithText("Избранное").assertIsDisplayed()
     }
 
     @Test
@@ -85,7 +85,7 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { LearnScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("Обучение").assertExists()
+        composeRule.onNodeWithText("Обучение").assertIsDisplayed()
     }
 
     @Test
@@ -93,7 +93,7 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { SettingsScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("Настройки").assertExists()
+        composeRule.onNodeWithText("Настройки").assertIsDisplayed()
     }
 
     @Test
@@ -101,7 +101,7 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { AboutScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("О программе").assertExists()
+        composeRule.onNodeWithText("О программе").assertIsDisplayed()
     }
 
     @Test
@@ -117,6 +117,6 @@ class ScreensRenderTest {
             }
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Промт").assertExists()
+        composeRule.onNodeWithText("Промт").assertIsDisplayed()
     }
 }

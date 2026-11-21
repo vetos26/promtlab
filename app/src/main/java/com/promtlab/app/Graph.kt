@@ -21,7 +21,7 @@ object Graph {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "promtlab.db"
-            ).fallbackToDestructiveMigration().build().also { database = it }
+            ).fallbackToDestructiveMigration(dropAllTables = true).build().also { database = it }
         }
 
     fun promptRepository(context: Context): PromptRepository =

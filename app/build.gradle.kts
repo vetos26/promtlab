@@ -83,7 +83,6 @@ dependencies {
     testImplementation("androidx.test:core-ktx:1.6.1")
     testImplementation("androidx.test.ext:junit:1.2.1")
     testImplementation("androidx.compose.ui:ui-test-junit4")
-    testImplementation("androidx.compose.ui:ui-test-manifest")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
