@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -131,6 +132,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /* ------------------------------- История ------------------------------ */
 
     val savedPrompts: StateFlow<List<SavedPrompt>> = repository.observeAll()
+        .catch { emit(emptyList()) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -230,6 +232,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /* ------------------------------ Настройки ----------------------------- */
 
     val settings: StateFlow<AppSettings> = settingsRepository.settings
+        .catch { emit(AppSettings()) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,

@@ -2,6 +2,8 @@ package com.promtlab.app.data.settings
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -12,7 +14,10 @@ import com.promtlab.app.ui.theme.AccentPalette
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "promtlab_settings")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "promtlab_settings",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() }
+)
 
 enum class ThemeMode(val label: String) {
     SYSTEM("Системная"),
