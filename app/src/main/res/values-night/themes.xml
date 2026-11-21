@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Базовый вариант для API 26: windowLightNavigationBar появился только в API 27. -->
     <style name="Theme.PromtLab" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/promtlab_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

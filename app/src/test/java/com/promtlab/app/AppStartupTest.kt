@@ -25,7 +25,7 @@ import org.robolectric.annotation.GraphicsMode
  * а не на устройстве пользователя.
  */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [34], qualifiers = "w411dp-h891dp-xhdpi")
+@Config(sdk = [26, 34], qualifiers = "w411dp-h891dp-xhdpi")
 @GraphicsMode(GraphicsMode.Mode.LEGACY)
 class AppStartupTest {
 

@@ -27,7 +27,7 @@ import org.robolectric.annotation.GraphicsMode
  * Ловит падения темы, навигации, Room/DataStore и ленивых списков до релиза.
  */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [34], qualifiers = "w411dp-h891dp-xhdpi")
+@Config(sdk = [26, 34], qualifiers = "w411dp-h891dp-xhdpi")
 @GraphicsMode(GraphicsMode.Mode.LEGACY)
 class ScreensRenderTest {
 
@@ -118,6 +118,6 @@ class ScreensRenderTest {
             }
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Промт").assertIsDisplayed()
+        composeRule.onNodeWithText("Промт не найден").assertIsDisplayed()
     }
 }

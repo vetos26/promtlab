@@ -21,7 +21,7 @@ import org.robolectric.annotation.GraphicsMode
  * тест печатает полную цепочку cause, а не только верхний ExceptionInInitializerError.
  */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [34], qualifiers = "w411dp-h891dp-xhdpi")
+@Config(sdk = [26, 34], qualifiers = "w411dp-h891dp-xhdpi")
 @GraphicsMode(GraphicsMode.Mode.LEGACY)
 class RootCauseTest {
 
