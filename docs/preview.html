@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PromtLab — дизайн-превью</title>
+<style>
+  :root {
+    --accent: #6c4dff;
+    --accent-2: #00a99d;
+    --bg: #0b0a10;
+    --panel: #14121c;
+    --panel-2: #1b1824;
+    --text: #f3effa;
+    --muted: #a9a2bc;
+    --line: #2b2738;
+    --white: #fdfbff;
+    --shadow: 0 40px 90px rgba(0, 0, 0, .55);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(900px 600px at 15% -10%, rgba(108, 77, 255, .35), transparent 60%),
+      radial-gradient(700px 500px at 90% 110%, rgba(0, 169, 157, .22), transparent 60%),
+      #08070c;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 60px;
+  }
+
+  .page { display: flex; gap: 56px; align-items: flex-start; max-width: 1120px; width: 100%; }
+
+  .intro { flex: 1; padding-top: 26px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(108, 77, 255, .16);
+    border: 1px solid rgba(140, 116, 255, .35);
+    color: #c9bbff; font-size: 12.5px; font-weight: 600; letter-spacing: .4px;
+  }
+  h1 {
+    font-size: 46px; line-height: 1.05; margin: 22px 0 14px;
+    letter-spacing: -1.6px;
+    background: linear-gradient(95deg, #fff 20%, #b9a8ff 60%, #6fe7d8 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .intro p { color: #b5aec7; font-size: 15.5px; line-height: 1.65; max-width: 430px; }
+  .features { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 12px; max-width: 440px; }
+  .features li {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: rgba(255, 255, 255, .035);
+    border: 1px solid rgba(255, 255, 255, .07);
+    padding: 13px 15px; border-radius: 16px;
+    font-size: 13.5px; color: #d6d0e4; line-height: 1.5;
+  }
+  .features b { color: #fff; font-weight: 600; }
+  .features span { font-size: 17px; line-height: 1.2; }
+  .hint {
+    margin-top: 26px; font-size: 12.5px; color: #8b849e;
+    border-left: 2px solid rgba(108, 77, 255, .6); padding-left: 12px; max-width: 420px; line-height: 1.6;
+  }
+
+  /* ---------------------------- Управление ---------------------------- */
+  .controls { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; padding-left: 6px; flex-wrap: wrap; }
+  .power {
+    width: 46px; height: 46px; border-radius: 15px; border: 1px solid var(--line);
+    background: var(--panel-2); color: var(--text); font-size: 18px; cursor: pointer;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .power:hover { transform: translateY(-2px); background: #262232; }
+  .swatches { display: flex; gap: 9px; }
+  .swatch {
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; outline: 2px solid transparent; outline-offset: 2px;
+    transition: outline-color .18s ease, transform .15s ease;
+  }
+  .swatch:hover { transform: scale(1.08); }
+  .swatch.active { outline-color: #fff; transform: scale(1.06); }
+  .controls .label { font-size: 12px; color: #8b849e; letter-spacing: .6px; text-transform: uppercase; }
+
+  /* ------------------------------- Телефон ---------------------------- */
+  .phone-wrap { flex-shrink: 0; position: relative; }
+  .phone {
+    width: 382px; height: 812px; border-radius: 54px; padding: 12px;
+    background: linear-gradient(160deg, #2a2636, #0d0c12 55%);
+    box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, .08);
+  }
+  .screen {
+    position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    transition: background .25s ease, color .25s ease;
+  }
+  .screen.light {
+    --bg: #f7f5fc; --panel: #ffffff; --panel-2: #f1edf8;
+    --text: #15131b; --muted: #6b6478; --line: #e6e1ee;
+  }
+  .notch {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    width: 104px; height: 26px; border-radius: 999px; background: #000; z-index: 30;
+  }
+  .status {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 26px 0; font-size: 12px; font-weight: 600; color: var(--text); z-index: 20;
+  }
+  .status .icons { display: flex; gap: 5px; align-items: center; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text); opacity: .75; }
+
+  .viewport { flex: 1; overflow-y: auto; padding: 12px 18px 22px; scrollbar-width: none; }
+  .viewport::-webkit-scrollbar { display: none; }
+
+  .app-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .app-header h2 {
+    margin: 0; font-size: 31px; letter-spacing: -1.1px; color: var(--text); line-height: 1.05;
+  }
+  .app-header p { margin: 5px 0 0; font-size: 12.5px; color: var(--muted); }
+  .app-header .spacer { flex: 1; }
+  .round-btn {
+    width: 42px; height: 42px; border-radius: 14px; border: 1px solid var(--line);
+    background: var(--panel-2); color: var(--muted); font-size: 15px; display: grid; place-items: center;
+  }
+  .round-btn.accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border: none; color: #fff; box-shadow: 0 10px 24px rgba(108, 77, 255, .4);
+  }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 22px;
+    padding: 15px; margin-bottom: 13px;
+  }
+  .card-title { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 650; color: var(--text); margin-bottom: 12px; }
+  .card-title .ico { color: var(--accent); font-size: 14px; }
+  .muted { color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+
+  .score-row { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+  .score { font-size: 21px; font-weight: 750; color: var(--accent); letter-spacing: -.5px; }
+  .score-label { flex: 1; font-size: 11.5px; color: var(--muted); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;
+    background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);
+  }
+  .track { height: 9px; border-radius: 999px; background: var(--panel-2); overflow: hidden; margin-bottom: 9px; }
+  .track > i {
+    display: block; height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .hint-row { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .hint-row em { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: .7; }
+
+  .field { margin-bottom: 11px; }
+  .field .lbl {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 1.1px; color: var(--muted);
+    margin-bottom: 6px; text-transform: uppercase;
+  }
+  .input {
+    border: 1px solid var(--line); background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+    border-radius: 14px; padding: 11px 12px; font-size: 12.5px; line-height: 1.5; color: var(--text);
+  }
+  .input.tall { min-height: 74px; }
+  .input .ph { color: var(--muted); opacity: .85; }
+  .input b { color: var(--accent); font-weight: 600; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 7px 11px; border-radius: 11px; background: var(--panel-2);
+    color: var(--muted); font-size: 11px; font-weight: 600; border: 1px solid transparent;
+  }
+  .chip.on {
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--accent); border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+  }
+  .mini-chips { display: flex; gap: 6px; overflow: hidden; margin-bottom: 10px; }
+  .mini {
+    white-space: nowrap; padding: 5px 9px; border-radius: 9px; background: var(--panel-2);
+    border: 1px solid var(--line); font-size: 10px; color: var(--muted);
+  }
+
+  .preview {
+    background: color-mix(in srgb, var(--panel-2) 80%, transparent);
+    border: 1px solid var(--line); border-radius: 15px; padding: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10.5px; line-height: 1.65; color: var(--text); white-space: pre-wrap;
+    max-height: 152px; overflow: hidden;
+  }
+  .preview .h { color: var(--accent); font-weight: 700; }
+  .stats { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 8px; margin-top: 11px; }
+  .btn {
+    flex: 1; border: none; border-radius: 15px; padding: 12px; cursor: pointer;
+    font-size: 12px; font-weight: 700; color: #fff;
+    background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    box-shadow: 0 10px 22px rgba(108, 77, 255, .25);
+  }
+  .icon-btn {
+    width: 44px; border-radius: 15px; border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--accent); font-size: 15px; cursor: pointer; display: grid; place-items: center;
+  }
+
+  /* -------------------------------- Списки ---------------------------- */
+  .search {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 11px;
+    border: 1px solid var(--line); background: var(--panel); border-radius: 16px;
+    padding: 12px 14px; font-size: 12px; color: var(--muted);
+  }
+  .tpl { display: flex; gap: 11px; }
+  .badge-sq {
+    width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--accent) 16%, transparent); font-size: 18px; flex-shrink: 0;
+  }
+  .tpl h4 { margin: 0 0 3px; font-size: 13px; color: var(--text); }
+  .tpl .cat { font-size: 10px; color: var(--accent); font-weight: 650; }
+  .tpl p { margin: 5px 0 9px; font-size: 11px; line-height: 1.5; color: var(--muted); }
+  .tpl-foot { display: flex; align-items: center; gap: 6px; }
+  .use {
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+    border-radius: 11px; padding: 7px 11px; font-size: 10.5px; font-weight: 650; cursor: pointer;
+  }
+  .use.primary { border: none; background: var(--accent); color: #fff; }
+  .hr { height: 1px; background: var(--line); margin: 10px 0; }
+
+  .row-between { display: flex; align-items: center; gap: 10px; }
+  .row-between .grow { flex: 1; }
+  .star { color: #ffb300; font-size: 15px; }
+
+  .switch {
+    width: 42px; height: 24px; border-radius: 999px; background: var(--panel-2);
+    border: 1px solid var(--line); position: relative; flex-shrink: 0;
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--muted); transition: all .2s ease;
+  }
+  .switch.on { background: color-mix(in srgb, var(--accent) 50%, transparent); border-color: var(--accent); }
+  .switch.on::after { left: 20px; background: #fff; }
+  .accent-dots { display: flex; justify-content: space-between; margin: 4px 0 10px; }
+  .accent-dots span {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; font-size: 12px; border: 2px solid var(--line);
+  }
+  .accent-dots span.active { border-color: var(--text); }
+  .about-logo {
+    width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; font-size: 21px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+
+  /* ------------------------------ Нижнее меню ------------------------- */
+  .bottom {
+    display: flex; justify-content: space-between; gap: 2px;
+    padding: 9px 12px 24px; background: color-mix(in srgb, var(--panel) 96%, transparent);
+    border-top: 1px solid var(--line); backdrop-filter: blur(14px);
+  }
+  .nav-item {
+    flex: 1; border: none; background: none; cursor: pointer; padding: 3px 0;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--muted); font-size: 9.5px; font-weight: 600; font-family: inherit;
+  }
+  .nav-item .glyph {
+    padding: 5px 15px; border-radius: 999px; font-size: 15px; line-height: 1;
+    transition: background .2s ease, transform .2s ease, color .2s ease;
+  }
+  .nav-item.on { color: var(--accent); }
+  .nav-item.on .glyph {
+    background: color-mix(in srgb, var(--accent) 18%, transparent); transform: scale(1.05);
+  }
+
+  .screen-view { display: none; animation: fade .22s ease; }
+  .screen-view.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .footnote { text-align: center; font-size: 11px; color: #6f687f; margin-top: 18px; }
+
+  @media (max-width: 980px) {
+    .page { flex-direction: column-reverse; align-items: center; gap: 34px; }
+    .intro { padding-top: 0; max-width: 430px; }
+    h1 { font-size: 38px; }
+    .phone { width: 342px; height: 730px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="intro">
+    <span class="badge">Kotlin · Jetpack Compose · Material 3</span>
+    <h1>PromtLab</h1>
+    <p>
+      Генератор промтов для промт-инженера. Собирайте структурированные промты
+      из роли, задачи, контекста и приёмов — с живой оценкой качества и мгновенным
+      предпросмотром.
+    </p>
+
+    <ul class="features">
+      <li><span>🧩</span><div><b>Конструктор без магии.</b> Роль, задача, контекст, аудитория, тон, формат и 8 приёмов промт-инжиниринга.</div></li>
+      <li><span>📚</span><div><b>16 шаблонов.</b> Маркетинг, код, бизнес, дизайн, обучение, ролевые сценарии — в один тап.</div></li>
+      <li><span>🕘</span><div><b>История и избранное.</b> Room, поиск, редактирование, копирование и экспорт промтов.</div></li>
+      <li><span>🎨</span><div><b>Современный дизайн.</b> Material 3, кастомное нижнее меню, 6 палитр, тёмная тема, Android 12+ dynamic color.</div></li>
+    </ul>
+
+    <div class="hint">
+      Это интерактивный макет интерфейса для быстрой проверки дизайна.
+      Само приложение — нативный Android-проект в этом репозитории:
+      <code>./gradlew :app:assembleDebug</code>.
+    </div>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="controls">
+      <button class="power" id="themeBtn" title="Светлая / тёмная тема">◐</button>
+      <span class="label">Акцент</span>
+      <div class="swatches" id="swatches">
+        <div class="swatch active" data-accent="#6c4dff" data-accent2="#00a99d" style="background:#6c4dff"></div>
+        <div class="swatch" data-accent="#3d5afe" data-accent2="#7a5af8" style="background:#3d5afe"></div>
+        <div class="swatch" data-accent="#0b8fb8" data-accent2="#2e6be6" style="background:#0b8fb8"></div>
+        <div class="swatch" data-accent="#00875a" data-accent2="#38a169" style="background:#00875a"></div>
+        <div class="swatch" data-accent="#b05e00" data-accent2="#c2410c" style="background:#b05e00"></div>
+        <div class="swatch" data-accent="#d6336c" data-accent2="#9d3fe0" style="background:#d6336c"></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="screen" id="screen">
+        <div class="notch"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="icons"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+        </div>
+
+        <div class="viewport">
+          <!-- ============================ СОЗДАТЬ ========================= -->
+          <section class="screen-view on" data-screen="generate">
+            <div class="app-header">
+              <div>
+                <h2>PromtLab</h2>
+                <p>Конструктор промтов для промт-инженера</p>
+              </div>
+              <div class="spacer"></div>
+              <div class="round-btn">↻</div>
+              <div class="round-btn accent">🎲</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">📈</span> Качество промта</div>
+              <div class="score-row">
+                <span class="score">78%</span>
+                <span class="score-label">Хороший черновик</span>
+                <span class="pill">⚡ live</span>
+              </div>
+              <div class="track"><i style="width:78%"></i></div>
+              <div class="hint-row"><em></em>Добавьте контекст: продукт, данные, ограничения</div>
+              <div class="hint-row"><em></em>Укажите аудиторию, чтобы модель выбрала глубину</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">📝</span> Роль модели</div>
+              <div class="mini-chips">
+                <span class="mini">senior-копирайтер</span>
+                <span class="mini">Kotlin-разработчик</span>
+                <span class="mini">аналитик</span>
+              </div>
+              <div class="field">
+                <div class="lbl">Роль</div>
+                <div class="input">Ты — <b>senior-копирайтер с опытом в B2B и SaaS</b></div>
+              </div>
+              <div class="field">
+                <div class="lbl">Задача</div>
+                <div class="input tall">Напиши текст для лендинга: заголовок, подзаголовок, 3 блока выгод и призыв к действию</div>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <div class="lbl">Контекст</div>
+                <div class="input"><span class="ph">Продукт, данные, метрики, ограничения…</span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🎛</span> Стиль и формат</div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">ТОНАЛЬНОСТЬ</div>
+              <div class="chips" style="margin-bottom:10px">
+                <span class="chip">Нейтральный</span>
+                <span class="chip on">Экспертный</span>
+                <span class="chip">Дружелюбный</span>
+              </div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">ФОРМАТ ОТВЕТА</div>
+              <div class="chips">
+                <span class="chip on">Markdown</span>
+                <span class="chip">Список</span>
+                <span class="chip">Таблица</span>
+                <span class="chip">JSON</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">⚡</span> Приёмы промт-инжиниринга</div>
+              <div class="chips">
+                <span class="chip on">Chain-of-Thought</span>
+                <span class="chip">Few-shot</span>
+                <span class="chip on">Без воды</span>
+                <span class="chip on">Структура</span>
+                <span class="chip">Самокритика</span>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="card-title"><span class="ico">✨</span> Готовый промт</div>
+              <div class="stats">
+                <span class="pill">1 240 символов</span>
+                <span class="pill">196 слов</span>
+                <span class="pill" style="background:color-mix(in srgb,var(--accent-2) 16%,transparent);color:var(--accent-2)">≈388 токенов</span>
+              </div>
+              <div class="preview"><span class="h"># РОЛЬ</span>
+Ты — senior-копирайтер с опытом в B2B и SaaS. Общайся в уверенном
+экспертном тоне.
+
+<span class="h"># ЗАДАЧА</span>
+Напиши текст для лендинга: заголовок, подзаголовок, 3 блока выгод…
+
+<span class="h"># ФОРМАТ ОТВЕТА</span>
+• Оформи ответ в Markdown
+• Объём: 300–500 слов
+• Отвечай на русском языке</div>
+              <div class="btn-row">
+                <button class="btn" onclick="flash(this)">📋 Копировать</button>
+                <button class="icon-btn" onclick="flash(this)">↗</button>
+                <button class="icon-btn" onclick="flash(this)">🔖</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============================ ШАБЛОНЫ ========================= -->
+          <section class="screen-view" data-screen="templates">
+            <div class="app-header">
+              <div>
+                <h2>Шаблоны</h2>
+                <p>Проверенные промты — применяйте в один тап</p>
+              </div>
+            </div>
+            <div class="search">🔍 Поиск по шаблонам и задачам</div>
+            <div class="chips" style="margin-bottom:12px">
+              <span class="chip on">Все</span>
+              <span class="chip">Маркетинг</span>
+              <span class="chip">Код</span>
+              <span class="chip">Бизнес</span>
+              <span class="chip">Обучение</span>
+            </div>
+            <div class="muted" style="margin-bottom:9px">Найдено: 16 из 16</div>
+
+            <div class="card">
+              <div class="tpl">
+                <div class="badge-sq">📣</div>
+                <div>
+                  <h4>Лендинг, который продаёт</h4>
+                  <div class="cat">Маркетинг</div>
+                  <p>Структура и тексты для посадочной страницы под конкретный продукт.</p>
+                  <div class="tpl-foot">
+                    <span class="pill">Markdown</span>
+                    <span class="pill" style="color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)">Экспертный</span>
+                    <span style="flex:1"></span>
+                    <button class="use primary">Использовать →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="tpl">
+                <div class="badge-sq">💻</div>
+                <div>
+                  <h4>Ревью кода</h4>
+                  <div class="cat">Код</div>
+                  <p>Найдёт баги, проблемы читаемости и предложит рефакторинг.</p>
+                  <div class="tpl-foot">
+                    <span class="pill">Код</span>
+                    <span class="pill" style="color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)">Деловой</span>
+                    <span style="flex:1"></span>
+                    <button class="use">Использовать →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="tpl">
+                <div class="badge-sq">📊</div>
+                <div>
+                  <h4>Продуктовая фича</h4>
+                  <div class="cat">Бизнес</div>
+                  <p>PRD: цель, user story, сценарии, метрики и риски.</p>
+                  <div class="tpl-foot">
+                    <span class="pill">Markdown</span>
+                    <span class="pill" style="color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)">Деловой</span>
+                    <span style="flex:1"></span>
+                    <button class="use">Использовать →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="tpl">
+                <div class="badge-sq">🎓</div>
+                <div>
+                  <h4>План обучения</h4>
+                  <div class="cat">Обучение</div>
+                  <p>Персональная программа на N недель с практикой и проверкой.</p>
+                  <div class="tpl-foot">
+                    <span class="pill">Инструкция</span>
+                    <span class="pill" style="color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)">Дружелюбный</span>
+                    <span style="flex:1"></span>
+                    <button class="use">Использовать →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============================ ИСТОРИЯ ========================= -->
+          <section class="screen-view" data-screen="history">
+            <div class="app-header">
+              <div>
+                <h2>История</h2>
+                <p>Сохранено 12 · в избранном 4</p>
+              </div>
+            </div>
+            <div class="search">🔍 Поиск по названию, тексту или категории</div>
+            <div class="chips" style="margin-bottom:12px">
+              <span class="chip on">Все промты</span>
+              <span class="chip">Избранное</span>
+            </div>
+            <div class="muted" style="margin-bottom:9px">Показано 2</div>
+
+            <div class="card">
+              <div class="row-between">
+                <div class="badge-sq">📣</div>
+                <div class="grow">
+                  <div style="font-size:13px;font-weight:650">Лендинг для SaaS-аналитики</div>
+                  <div class="muted" style="margin-top:3px">Ты — senior-копирайтер с опытом в B2B и SaaS. Общайся в уверенном экспертном тоне…</div>
+                  <div style="display:flex;gap:6px;margin-top:7px;font-size:10px;color:var(--muted)">
+                    <span style="color:var(--accent)">Маркетинг</span><span>·</span><span>21 ноя, 14:32</span><span>·</span><span>Markdown</span>
+                  </div>
+                </div>
+                <span class="star">★</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row-between">
+                <div class="badge-sq">💻</div>
+                <div class="grow">
+                  <div style="font-size:13px;font-weight:650">Ревью ViewModel на Compose</div>
+                  <div class="muted" style="margin-top:3px">Сделай ревью кода: баги, безопасность, читаемость и архитектура…</div>
+                  <div style="display:flex;gap:6px;margin-top:7px;font-size:10px;color:var(--muted)">
+                    <span style="color:var(--accent)">Код</span><span>·</span><span>20 ноя, 19:10</span><span>·</span><span>Код</span>
+                  </div>
+                </div>
+                <span class="star" style="color:var(--muted)">☆</span>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="row-between">
+                <div class="badge-sq">🎭</div>
+                <div class="grow">
+                  <div style="font-size:13px;font-weight:650">Сократовский диалог по стратегии</div>
+                  <div class="muted" style="margin-top:3px">Веди меня к решению проблемы, задавая вопросы по одному…</div>
+                  <div style="display:flex;gap:6px;margin-top:7px;font-size:10px;color:var(--muted)">
+                    <span style="color:var(--accent)">Ролевые</span><span>·</span><span>19 ноя, 09:45</span><span>·</span><span>Список</span>
+                  </div>
+                </div>
+                <span class="star">★</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- =========================== НАСТРОЙКИ ======================== -->
+          <section class="screen-view" data-screen="settings">
+            <div class="app-header">
+              <div>
+                <h2>Настройки</h2>
+                <p>Оформление, данные и о приложении</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🌙</span> Тема</div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">РЕЖИМ ОФОРМЛЕНИЯ</div>
+              <div class="chips" style="margin-bottom:12px">
+                <span class="chip">Системная</span>
+                <span class="chip on">Тёмная</span>
+                <span class="chip">Светлая</span>
+              </div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">АКЦЕНТНЫЙ ЦВЕТ</div>
+              <div class="accent-dots">
+                <span class="active" style="background:#6c4dff">✓</span>
+                <span style="background:#3d5afe"></span>
+                <span style="background:#0b8fb8"></span>
+                <span style="background:#00875a"></span>
+                <span style="background:#b05e00"></span>
+                <span style="background:#d6336c"></span>
+              </div>
+              <div class="muted">Палитра применяется ко всем экранам, кнопкам и нижнему меню.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🎛</span> Интерфейс</div>
+              <div class="row-between" style="margin-bottom:12px">
+                <div class="grow">
+                  <div style="font-size:12.5px;font-weight:600">Динамические цвета</div>
+                  <div class="muted">Подстраиваться под обои (Android 12+)</div>
+                </div>
+                <div class="switch"></div>
+              </div>
+              <div class="row-between">
+                <div class="grow">
+                  <div style="font-size:12.5px;font-weight:600">Счётчик токенов</div>
+                  <div class="muted">Показывать оценку размера в превью</div>
+                </div>
+                <div class="switch on"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🗄</span> Данные</div>
+              <div class="stats">
+                <span class="pill">12 сохранено</span>
+                <span class="pill" style="color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)">4 в избранном</span>
+              </div>
+              <div class="card" style="background:var(--panel-2);border-radius:14px;padding:12px;margin:0 0 8px;text-align:center;font-size:12px;font-weight:650">↗ Экспортировать все промты</div>
+              <div style="background:color-mix(in srgb,#ff5f56 12%,transparent);border-radius:14px;padding:12px;text-align:center;font-size:12px;font-weight:650;color:#ff8a80">🗑 Очистить историю</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="card-title"><span class="ico">ℹ</span> О приложении</div>
+              <div class="row-between" style="margin-bottom:10px">
+                <div class="about-logo">✨</div>
+                <div class="grow">
+                  <div style="font-size:13px;font-weight:650">PromtLab</div>
+                  <div class="muted">Версия 1.0.0 · Kotlin + Compose</div>
+                </div>
+              </div>
+              <div class="muted" style="margin-bottom:10px">
+                Конструктор промтов для промт-инженера: роль, задача, контекст, приёмы
+                и мгновенный предпросмотр. Всё хранится локально на устройстве.
+              </div>
+              <div class="chips">
+                <span class="pill">Kotlin</span>
+                <span class="pill" style="color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 14%,transparent)">Compose</span>
+                <span class="pill">Material 3</span>
+                <span class="pill" style="color:var(--muted);background:var(--panel-2)">Room</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <nav class="bottom" id="bottomNav">
+          <button class="nav-item on" data-target="generate"><span class="glyph">✨</span>Создать</button>
+          <button class="nav-item" data-target="templates"><span class="glyph">▦</span>Шаблоны</button>
+          <button class="nav-item" data-target="history"><span class="glyph">🕘</span>История</button>
+          <button class="nav-item" data-target="settings"><span class="glyph">⚙</span>Настройки</button>
+        </nav>
+      </div>
+    </div>
+    <div class="footnote">Макет соответствует Compose-экранам приложения в этом репозитории</div>
+  </div>
+</div>
+
+<script>
+  const screen = document.getElementById('screen');
+  const navButtons = document.querySelectorAll('.nav-item');
+  const views = document.querySelectorAll('.screen-view');
+  const viewport = document.querySelector('.viewport');
+
+  navButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('on'));
+      button.classList.add('on');
+      const target = button.dataset.target;
+      views.forEach(view => view.classList.toggle('on', view.dataset.screen === target));
+      viewport.scrollTop = 0;
+    });
+  });
+
+  document.getElementById('themeBtn').addEventListener('click', (e) => {
+    screen.classList.toggle('light');
+    e.currentTarget.textContent = screen.classList.contains('light') ? '◑' : '◐';
+  });
+
+  document.querySelectorAll('.swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      screen.style.setProperty('--accent', swatch.dataset.accent);
+      screen.style.setProperty('--accent-2', swatch.dataset.accent2);
+    });
+  });
+
+  function flash(el) {
+    const previous = el.textContent;
+    if (el.classList.contains('icon-btn')) {
+      el.style.background = 'var(--accent)';
+      el.style.color = '#fff';
+      setTimeout(() => { el.style.background = ''; el.style.color = ''; }, 700);
+      return;
+    }
+    el.textContent = '✓ Скопировано';
+    setTimeout(() => { el.textContent = previous; }, 1100);
+  }
+</script>
+</body>
+</html>
