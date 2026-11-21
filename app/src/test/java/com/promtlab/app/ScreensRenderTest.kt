@@ -45,7 +45,7 @@ class ScreensRenderTest {
                 PromtLabApp(viewModel = viewModel)
             }
         }
-        composeRule.onNodeWithText("Создать промт").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Создать промт")[0].assertIsDisplayed()
     }
 
     @Test
@@ -53,8 +53,8 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { GenerateScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("Создать промт").assertIsDisplayed()
         composeRule.onNodeWithText("Качество промта").assertIsDisplayed()
+        composeRule.onNodeWithText("Роль модели").assertIsDisplayed()
     }
 
     @Test
@@ -64,7 +64,7 @@ class ScreensRenderTest {
                 TemplatesScreen(viewModel = viewModel, onTemplateApplied = {})
             }
         }
-        composeRule.onNodeWithText("Шаблоны").assertIsDisplayed()
+        composeRule.onNodeWithText("Поиск по шаблонам и задачам").assertIsDisplayed()
     }
 
     @Test
@@ -86,7 +86,7 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { LearnScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("Обучение").assertIsDisplayed()
+        composeRule.onNodeWithText("Ваш прогресс").assertIsDisplayed()
     }
 
     @Test
@@ -94,7 +94,7 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { SettingsScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("Настройки").assertIsDisplayed()
+        composeRule.onNodeWithText("РЕЖИМ ОФОРМЛЕНИЯ").assertIsDisplayed()
     }
 
     @Test
@@ -102,7 +102,7 @@ class ScreensRenderTest {
         composeRule.setContent {
             PromtLabTheme { AboutScreen(viewModel = viewModel) }
         }
-        composeRule.onNodeWithText("О программе").assertIsDisplayed()
+        composeRule.onNodeWithText("Что умеет").assertIsDisplayed()
     }
 
     @Test
