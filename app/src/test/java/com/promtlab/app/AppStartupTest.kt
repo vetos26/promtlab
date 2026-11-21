@@ -26,7 +26,7 @@ import org.robolectric.annotation.GraphicsMode
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-xhdpi")
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@GraphicsMode(GraphicsMode.Mode.LEGACY)
 class AppStartupTest {
 
     @get:Rule

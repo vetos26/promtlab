@@ -84,7 +84,12 @@ jobs:
                       if node is None:
                           continue
                       text = (node.get("message") or "") + "\n" + (node.text or "")
-                      head = "\n".join(text.splitlines()[:40])
+                      lines = text.splitlines()
+                      cause_idx = next((i for i, l in enumerate(lines) if "Caused by" in l), None)
+                      if cause_idx is not None:
+                          head = "\n".join(lines[:6] + ["..."] + lines[cause_idx:cause_idx + 25])
+                      else:
+                          head = "\n".join(lines[:30])
                       chunks.append(f"### {case.get('classname')}.{case.get('name')}\n```\n{head}\n```")
           body = "# Startup test report\n\n" + ("\n\n".join(chunks) or "all green")
           body = body[:60000]

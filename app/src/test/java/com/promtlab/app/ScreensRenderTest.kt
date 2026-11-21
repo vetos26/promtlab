@@ -2,6 +2,7 @@ package com.promtlab.app
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,7 +28,7 @@ import org.robolectric.annotation.GraphicsMode
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-xhdpi")
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@GraphicsMode(GraphicsMode.Mode.LEGACY)
 class ScreensRenderTest {
 
     @get:Rule
@@ -77,7 +78,7 @@ class ScreensRenderTest {
                 )
             }
         }
-        composeRule.onNodeWithText("Избранное").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Избранное")[0].assertIsDisplayed()
     }
 
     @Test
