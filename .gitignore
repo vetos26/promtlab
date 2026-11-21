@@ -10,3 +10,7 @@ captures
 .cxx
 *.apk
 *.aab
+
+# built APK published by CI
+!artifacts/promtlab-debug.apk
+!artifacts/promtlab-debug.apk.sha256

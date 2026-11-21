@@ -29,6 +29,22 @@ snackbar-уведомления, адаптивная иконка запуск�
 Макет интерфейса (интерактивный, открывается в браузере): [`docs/preview.html`](docs/preview.html).
 Это дизайн-превью, а не само приложение — реальный UI собирается из Compose-кода.
 
+## Готовый APK
+
+Собранный debug-APK лежит прямо в репозитории: [`artifacts/promtlab-debug.apk`](artifacts/promtlab-debug.apk)
+(~18 МБ, подписан debug-ключом, SHA-256 в [`artifacts/promtlab-debug.apk.sha256`](artifacts/promtlab-debug.apk.sha256)).
+
+```bash
+# установка по USB
+adb install -r artifacts/promtlab-debug.apk
+
+# или скопируйте файл на телефон и откройте — разрешите установку из этого источника
+```
+
+APK пересобирается автоматически в CI (`Android CI`) и коммитится в ветку ботом,
+поэтому это всегда сборка из последнего коммита. Debug-ключ годится только для
+тестирования: для Google Play нужен release-keystore (`./gradlew :app:assembleRelease`).
+
 ## Как собрать
 
 Требования: **JDK 17+**, **Android SDK 35** (Android Studio Koala/Ladybug или новее).
