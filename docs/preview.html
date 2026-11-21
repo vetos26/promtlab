@@ -250,25 +250,91 @@
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
   }
 
-  /* ------------------------------ Нижнее меню ------------------------- */
-  .bottom {
-    display: flex; justify-content: space-between; gap: 2px;
-    padding: 9px 12px 24px; background: color-mix(in srgb, var(--panel) 96%, transparent);
-    border-top: 1px solid var(--line); backdrop-filter: blur(14px);
+  /* --------------------------- Выдвижное меню ------------------------- */
+  .drawer-scrim {
+    position: absolute; inset: 0; background: rgba(6, 5, 10, .58); z-index: 40;
+    opacity: 0; pointer-events: none; transition: opacity .25s ease;
   }
-  .nav-item {
-    flex: 1; border: none; background: none; cursor: pointer; padding: 3px 0;
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    color: var(--muted); font-size: 9.5px; font-weight: 600; font-family: inherit;
+  .drawer-scrim.on { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: absolute; top: 0; bottom: 0; left: 0; width: 268px; z-index: 50;
+    background: var(--panel); border-right: 1px solid var(--line);
+    border-radius: 0 26px 26px 0; padding: 24px 12px 16px;
+    display: flex; flex-direction: column;
+    transform: translateX(-105%); transition: transform .28s cubic-bezier(.22,.7,.24,1);
+    box-shadow: 30px 0 60px rgba(0, 0, 0, .35);
   }
-  .nav-item .glyph {
-    padding: 5px 15px; border-radius: 999px; font-size: 15px; line-height: 1;
-    transition: background .2s ease, transform .2s ease, color .2s ease;
+  .drawer.on { transform: none; }
+  .drawer-head { display: flex; align-items: center; gap: 10px; padding: 0 8px 18px; }
+  .drawer-logo {
+    width: 44px; height: 44px; border-radius: 15px; display: grid; place-items: center; font-size: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
   }
-  .nav-item.on { color: var(--accent); }
-  .nav-item.on .glyph {
-    background: color-mix(in srgb, var(--accent) 18%, transparent); transform: scale(1.05);
+  .drawer-head b { font-size: 17px; letter-spacing: -.4px; }
+  .drawer-head span { display: block; font-size: 10px; color: var(--muted); }
+  .drawer-label { font-size: 9px; letter-spacing: 1.2px; color: var(--muted); font-weight: 700; padding: 0 10px 6px; }
+  .drawer-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 15px;
+    cursor: pointer; border: none; background: none; width: 100%; text-align: left;
+    font-family: inherit; color: var(--muted); transition: background .18s ease;
   }
+  .drawer-item:hover { background: color-mix(in srgb, var(--panel-2) 70%, transparent); }
+  .drawer-item .di {
+    width: 32px; height: 32px; border-radius: 11px; display: grid; place-items: center;
+    background: var(--panel-2); font-size: 14px; flex-shrink: 0;
+  }
+  .drawer-item .dt { flex: 1; min-width: 0; }
+  .drawer-item .dt b { display: block; font-size: 12px; color: var(--text); font-weight: 600; }
+  .drawer-item .dt span { display: block; font-size: 9.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-item .cnt {
+    font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 8px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);
+  }
+  .drawer-item.on { background: color-mix(in srgb, var(--accent) 15%, transparent); }
+  .drawer-item.on .di { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+  .drawer-item.on .di, .drawer-item.on .dt b { color: var(--accent); }
+  .drawer .grow { flex: 1; }
+  .drawer-progress {
+    border-radius: 16px; background: color-mix(in srgb, var(--panel-2) 80%, transparent);
+    padding: 11px 12px; margin-bottom: 10px;
+  }
+  .drawer-progress .row-between { font-size: 11px; font-weight: 650; color: var(--text); }
+  .drawer-progress .track { margin: 7px 0 5px; height: 6px; }
+  .drawer-progress .muted { font-size: 9.5px; }
+  .drawer-theme { display: flex; align-items: center; gap: 9px; padding: 8px 8px 4px; font-size: 11.5px; color: var(--text); }
+  .drawer-theme .spacer { flex: 1; }
+  .drawer-ver { font-size: 9px; color: var(--muted); padding: 6px 10px 0; }
+
+  .topbar { display: flex; align-items: center; gap: 8px; padding: 2px 0 12px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .tb-title { font-size: 11.5px; font-weight: 650; color: var(--muted); letter-spacing: .3px; }
+  .burger {
+    width: 40px; height: 40px; border-radius: 14px; border: 1px solid var(--line);
+    background: var(--panel-2); color: var(--text); font-size: 15px; cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .burger:hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
+
+  .mode-switch {
+    display: flex; gap: 4px; padding: 4px; border-radius: 16px;
+    background: var(--panel-2); margin-bottom: 13px;
+  }
+  .mode-switch button {
+    flex: 1; border: none; background: none; border-radius: 12px; padding: 9px 6px;
+    font-family: inherit; font-size: 11.5px; font-weight: 650; color: var(--muted);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .mode-switch button.on {
+    background: color-mix(in srgb, var(--accent) 20%, var(--panel));
+    color: var(--accent);
+  }
+  .lesson { border: 1px solid var(--line); background: var(--panel); border-radius: 20px; padding: 13px; margin-bottom: 11px; }
+  .lesson h4 { margin: 0 0 3px; font-size: 12.5px; color: var(--text); }
+  .lesson p { margin: 0; font-size: 10.5px; color: var(--muted); line-height: 1.5; }
+  .lesson .lh { display: flex; gap: 9px; align-items: center; margin-bottom: 7px; }
+  .lesson .lh .ico { font-size: 17px; }
+  .lesson .done { font-size: 9.5px; color: var(--accent); font-weight: 700; margin-top: 8px; }
+  .about-pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
 
   .screen-view { display: none; animation: fade .22s ease; }
   .screen-view.on { display: block; }
@@ -291,15 +357,16 @@
     <h1>PromtLab</h1>
     <p>
       Генератор промтов для промт-инженера. Собирайте структурированные промты
-      из роли, задачи, контекста и приёмов — с живой оценкой качества и мгновенным
-      предпросмотром.
+      для текста и изображений — с живой оценкой качества, выдвижным меню слева
+      и библиотекой шаблонов, уроков и избранного.
     </p>
 
     <ul class="features">
       <li><span>🧩</span><div><b>Конструктор без магии.</b> Роль, задача, контекст, аудитория, тон, формат и 8 приёмов промт-инжиниринга.</div></li>
       <li><span>📚</span><div><b>16 шаблонов.</b> Маркетинг, код, бизнес, дизайн, обучение, ролевые сценарии — в один тап.</div></li>
-      <li><span>🕘</span><div><b>История и избранное.</b> Room, поиск, редактирование, копирование и экспорт промтов.</div></li>
-      <li><span>🎨</span><div><b>Современный дизайн.</b> Material 3, кастомное нижнее меню, 6 палитр, тёмная тема, Android 12+ dynamic color.</div></li>
+      <li><span>🖼</span><div><b>Ещё и изображения.</b> Режим картинок внутри генератора: 12 стилей, свет, оптика, negative prompt и параметры Midjourney / SDXL / DALL·E / Flux.</div></li>
+      <li><span>🎓</span><div><b>Обучение и избранное.</b> 8 коротких уроков с прогрессом, сохранённые промты в Room, поиск и экспорт.</div></li>
+      <li><span>🎨</span><div><b>Современный дизайн.</b> Material 3, выдвижное меню слева, 6 палитр, тёмная тема, Android 12+ dynamic color.</div></li>
     </ul>
 
     <div class="hint">
@@ -331,17 +398,54 @@
           <span class="icons"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
         </div>
 
+        <aside class="drawer" id="drawer">
+          <div class="drawer-head">
+            <div class="drawer-logo">✨</div>
+            <div><b>PromtLab</b><span>Промт-инженерия под рукой</span></div>
+          </div>
+          <div class="drawer-label">НАВИГАЦИЯ</div>
+          <button class="drawer-item on" data-target="generate"><span class="di">✨</span><span class="dt"><b>Создать промт</b><span>Конструктор текстовых промтов</span></span><span class="cnt">14</span></button>
+          <button class="drawer-item" data-target="image"><span class="di">🖼</span><span class="dt"><b>Изображения</b><span>Промты для нейросетей-художников</span></span></button>
+          <button class="drawer-item" data-target="templates"><span class="di">▦</span><span class="dt"><b>Шаблоны</b><span>Готовые промты в один тап</span></span></button>
+          <button class="drawer-item" data-target="favorites"><span class="di">⭐</span><span class="dt"><b>Избранное</b><span>Сохранённые и лучшие промты</span></span><span class="cnt">5</span></button>
+          <button class="drawer-item" data-target="learn"><span class="di">🎓</span><span class="dt"><b>Обучающие материалы</b><span>Короткие уроки по промт-инжинирингу</span></span></button>
+          <button class="drawer-item" data-target="settings"><span class="di">⚙</span><span class="dt"><b>Настройки</b><span>Тема, акцент, данные</span></span></button>
+          <button class="drawer-item" data-target="about"><span class="di">ⓘ</span><span class="dt"><b>О программе</b><span>Версия, стек, лицензия</span></span></button>
+          <div class="grow"></div>
+          <div class="drawer-progress">
+            <div class="row-between"><span>Обучение</span><span style="color:var(--accent)">3 / 8</span></div>
+            <div class="track"><i style="width:37%"></i></div>
+            <div class="muted">Осталось 5 уроков</div>
+          </div>
+          <div class="drawer-theme">🌙 Тёмная тема <span class="spacer"></span><span class="switch on"></span></div>
+          <div class="drawer-ver">PromtLab 1.0.0 · Kotlin + Compose</div>
+        </aside>
+        <div class="drawer-scrim" id="scrim"></div>
+
+        <div class="topbar">
+          <button class="burger" id="burger" title="Открыть меню">☰</button>
+          <span class="spacer"></span>
+          <span class="tb-title" id="tbTitle">Создать промт</span>
+          <span class="spacer"></span>
+          <button class="burger" id="quickTheme" title="Светлая / тёмная тема">◐</button>
+        </div>
+
         <div class="viewport">
           <!-- ============================ СОЗДАТЬ ========================= -->
           <section class="screen-view on" data-screen="generate">
             <div class="app-header">
               <div>
-                <h2>PromtLab</h2>
-                <p>Конструктор промтов для промт-инженера</p>
+                <h2>Создать промт</h2>
+                <p>Текст: роль модели, задача и приёмы</p>
               </div>
               <div class="spacer"></div>
               <div class="round-btn">↻</div>
               <div class="round-btn accent">🎲</div>
+            </div>
+
+            <div class="mode-switch">
+              <button class="on">✨ Текст</button>
+              <button onclick="goTo('image')">🖼 Изображение</button>
             </div>
 
             <div class="card">
@@ -423,6 +527,131 @@
 • Оформи ответ в Markdown
 • Объём: 300–500 слов
 • Отвечай на русском языке</div>
+              <div class="btn-row">
+                <button class="btn" onclick="flash(this)">📋 Копировать</button>
+                <button class="icon-btn" onclick="flash(this)">↗</button>
+                <button class="icon-btn" onclick="flash(this)">🔖</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============================ ИЗОБРАЖЕНИЯ ===================== -->
+          <section class="screen-view" data-screen="image">
+            <div class="app-header">
+              <div>
+                <h2>Изображения</h2>
+                <p>Режим «Изображение» внутри генератора</p>
+              </div>
+              <div class="spacer"></div>
+              <div class="round-btn">↻</div>
+              <div class="round-btn accent">🎲</div>
+            </div>
+
+            <div class="mode-switch">
+              <button onclick="goTo('generate')">✨ Текст</button>
+              <button class="on">🖼 Изображение</button>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🖼</span> Качество промта изображения</div>
+              <div class="score-row">
+                <span class="score">92%</span>
+                <span class="score-label">Готов к работе</span>
+                <span class="pill">⚡ live</span>
+              </div>
+              <div class="track"><i style="width:92%"></i></div>
+              <div class="hint-row"><em></em>Добавьте negative prompt — уберёт артефакты и текст</div>
+            </div>
+
+            <div class="mini-chips">
+              <span class="mini">Киберпанк-город</span>
+              <span class="mini">Портрет в золотой час</span>
+              <span class="mini">3D-иконка</span>
+              <span class="mini">Акварельный пейзаж</span>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🖼</span> Что на изображении</div>
+              <div class="field">
+                <div class="lbl">Сюжет (можно по-русски)</div>
+                <div class="input tall">Дождливая улица <b>киберпанк-города</b> ночью, курьер с неоновым зонтом</div>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <div class="lbl">Детали и окружение</div>
+                <div class="input">Иероглифы на вывесках, пар из люков, отражения в мокром асфальте</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🎨</span> Стиль и палитра</div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">СТИЛЬ</div>
+              <div class="chips" style="margin-bottom:10px">
+                <span class="chip">📷 Фотореализм</span>
+                <span class="chip on">🌆 Киберпанк</span>
+                <span class="chip">🌸 Аниме</span>
+                <span class="chip">🧊 3D-рендер</span>
+                <span class="chip">🎨 Акварель</span>
+              </div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">ПАЛИТРА</div>
+              <div class="chips">
+                <span class="chip">Тёплая</span>
+                <span class="chip on">Неон</span>
+                <span class="chip">Монохром</span>
+                <span class="chip">Пастель</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">💡</span> Свет, кадр и модель</div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">ОСВЕЩЕНИЕ</div>
+              <div class="chips" style="margin-bottom:10px">
+                <span class="chip">Студийный</span>
+                <span class="chip on">Неон</span>
+                <span class="chip">Золотой час</span>
+              </div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">НЕЙРОСЕТЬ</div>
+              <div class="chips" style="margin-bottom:10px">
+                <span class="chip on">Midjourney</span>
+                <span class="chip">SDXL</span>
+                <span class="chip">DALL·E 3</span>
+                <span class="chip">Flux</span>
+              </div>
+              <div class="lbl" style="font-size:9.5px;color:var(--muted);margin-bottom:6px">СООТНОШЕНИЕ СТОРОН</div>
+              <div class="chips">
+                <span class="chip">1:1</span>
+                <span class="chip">4:5</span>
+                <span class="chip">16:9</span>
+                <span class="chip on">21:9</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">🛡</span> Negative prompt</div>
+              <div class="muted" style="margin-bottom:8px">blurry, extra fingers, watermark, text, oversaturated colors</div>
+              <div class="chips">
+                <span class="chip">+ watermark</span>
+                <span class="chip">+ text</span>
+                <span class="chip">+ blurry</span>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="card-title"><span class="ico">🖼</span> Готовый промт</div>
+              <div class="stats">
+                <span class="pill">Midjourney</span>
+                <span class="pill">21:9</span>
+                <span class="pill" style="background:color-mix(in srgb,var(--accent-2) 16%,transparent);color:var(--accent-2)">≈74 токена</span>
+              </div>
+              <div class="preview"><span class="h">PROMPT</span>
+rainy cyberpunk street market at night, a lone courier with a glowing
+umbrella, holographic signs, neon lighting, wide establishing shot,
+24mm lens, neon palette, mysterious atmosphere, ultra detailed, 8k
+
+<span class="h">NEGATIVE</span>
+blurry, extra fingers, watermark, text
+
+<span class="h">ПАРАМЕТРЫ</span>
+--v 6.1 --style raw --q 2 --ar 21:9</div>
               <div class="btn-row">
                 <button class="btn" onclick="flash(this)">📋 Копировать</button>
                 <button class="icon-btn" onclick="flash(this)">↗</button>
@@ -519,11 +748,11 @@
           </section>
 
           <!-- ============================ ИСТОРИЯ ========================= -->
-          <section class="screen-view" data-screen="history">
+          <section class="screen-view" data-screen="favorites">
             <div class="app-header">
               <div>
-                <h2>История</h2>
-                <p>Сохранено 12 · в избранном 4</p>
+                <h2>Избранное</h2>
+                <p>В избранном 5 · всего сохранено 14</p>
               </div>
             </div>
             <div class="search">🔍 Поиск по названию, тексту или категории</div>
@@ -654,14 +883,76 @@
               </div>
             </div>
           </section>
+
+          <!-- ============================ ОБУЧЕНИЕ ======================== -->
+          <section class="screen-view" data-screen="learn">
+            <div class="app-header">
+              <div>
+                <h2>Обучение</h2>
+                <p>Короткие уроки: от структуры промта до изображений</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">✅</span> Ваш прогресс</div>
+              <div class="score-row">
+                <span class="score">3 из 8</span>
+                <span class="score-label">уроков изучено</span>
+              </div>
+              <div class="track"><i style="width:37%"></i></div>
+            </div>
+
+            <div class="lesson"><div class="lh"><span class="ico">🧩</span><div><h4>Анатомия сильного промта</h4><p>Шесть блоков: роль, задача, контекст, аудитория, ограничения, формат</p></div></div><div class="done">✓ прочитано</div></div>
+            <div class="lesson"><div class="lh"><span class="ico">🎭</span><div><h4>Роль и персона</h4><p>Как роль меняет словарь, глубину и уверенность ответа</p></div></div><div class="done">✓ прочитано</div></div>
+            <div class="lesson"><div class="lh"><span class="ico">🗂</span><div><h4>Контекст решает</h4><p>Данные, ограничения и примеры — топливо качества</p></div></div><div class="done">✓ прочитано</div></div>
+            <div class="lesson"><div class="lh"><span class="ico">📐</span><div><h4>Формат ответа</h4><p>Просите таблицу, JSON или шаги — а не «что-нибудь красивое»</p></div></div></div>
+            <div class="lesson"><div class="lh"><span class="ico">🧠</span><div><h4>Chain-of-Thought и шаги</h4><p>Как заставить модель рассуждать, а не угадывать</p></div></div></div>
+            <div class="lesson"><div class="lh"><span class="ico">🎯</span><div><h4>Few-shot: обучение примерами</h4><p>Один-два примера работают лучше десяти абзацев описаний</p></div></div></div>
+            <div class="lesson"><div class="lh"><span class="ico">🖼</span><div><h4>Промты для изображений</h4><p>Сюжет, стиль, свет, камера, палитра, негатив, параметры</p></div></div></div>
+            <div class="lesson" style="margin-bottom:0"><div class="lh"><span class="ico">🚫</span><div><h4>Частые ошибки</h4><p>Чек-лист перед отправкой промта в модель</p></div></div></div>
+          </section>
+
+          <!-- ============================ О ПРОГРАММЕ ===================== -->
+          <section class="screen-view" data-screen="about">
+            <div class="app-header">
+              <div>
+                <h2>О программе</h2>
+                <p>PromtLab 1.0.0 · Kotlin + Jetpack Compose</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row-between" style="margin-bottom:11px">
+                <div class="about-logo">✨</div>
+                <div class="grow" style="margin-left:11px"><b style="font-size:15px">PromtLab</b><div class="muted">Версия 1.0.0</div></div>
+                <span class="pill">MIT</span>
+              </div>
+              <div class="muted">Рабочее место промт-инженера: конструктор промтов для текста и изображений, библиотека шаблонов, избранное и короткие уроки. Всё считается и хранится локально.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span class="ico">ⓘ</span> Что умеет</div>
+              <div class="hint-row"><em></em>Генератор текстовых промтов: роль, задача, контекст, тон, приёмы</div>
+              <div class="hint-row"><em></em>Промты для изображений: стиль, свет, камера, параметры</div>
+              <div class="hint-row"><em></em>16 шаблонов и 8 обучающих уроков</div>
+              <div class="hint-row"><em></em>Избранное и поиск по сохранённым промтам</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="card-title"><span class="ico">⌘</span> Технологии</div>
+              <div class="about-pills">
+                <span class="pill">Kotlin 2.0</span><span class="pill">Compose</span>
+                <span class="pill">Material 3</span><span class="pill">Room</span>
+                <span class="pill">DataStore</span><span class="pill">Navigation</span>
+              </div>
+              <div class="btn-row" style="margin-top:4px">
+                <button class="btn" onclick="flash(this)">GitHub репозиторий</button>
+              </div>
+            </div>
+          </section>
+
         </div>
 
-        <nav class="bottom" id="bottomNav">
-          <button class="nav-item on" data-target="generate"><span class="glyph">✨</span>Создать</button>
-          <button class="nav-item" data-target="templates"><span class="glyph">▦</span>Шаблоны</button>
-          <button class="nav-item" data-target="history"><span class="glyph">🕘</span>История</button>
-          <button class="nav-item" data-target="settings"><span class="glyph">⚙</span>Настройки</button>
-        </nav>
       </div>
     </div>
     <div class="footnote">Макет соответствует Compose-экранам приложения в этом репозитории</div>
@@ -670,19 +961,51 @@
 
 <script>
   const screen = document.getElementById('screen');
-  const navButtons = document.querySelectorAll('.nav-item');
+  const drawer = document.getElementById('drawer');
+  const scrim = document.getElementById('scrim');
+  const burger = document.getElementById('burger');
+  const drawerItems = document.querySelectorAll('.drawer-item');
   const views = document.querySelectorAll('.screen-view');
   const viewport = document.querySelector('.viewport');
+  const tbTitle = document.getElementById('tbTitle');
 
-  navButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      navButtons.forEach(b => b.classList.remove('on'));
-      button.classList.add('on');
-      const target = button.dataset.target;
-      views.forEach(view => view.classList.toggle('on', view.dataset.screen === target));
-      viewport.scrollTop = 0;
-    });
+  const titles = {
+    generate: 'Создать промт',
+    image: 'Изображения',
+    templates: 'Шаблоны',
+    favorites: 'Избранное',
+    learn: 'Обучающие материалы',
+    settings: 'Настройки',
+    about: 'О программе'
+  };
+
+  function openDrawer() { drawer.classList.add('on'); scrim.classList.add('on'); }
+  function closeDrawer() { drawer.classList.remove('on'); scrim.classList.remove('on'); }
+
+  burger.addEventListener('click', openDrawer);
+  scrim.addEventListener('click', closeDrawer);
+
+  function goTo(target) {
+    drawerItems.forEach(item => item.classList.toggle('on', item.dataset.target === target));
+    views.forEach(view => view.classList.toggle('on', view.dataset.screen === target));
+    if (tbTitle) tbTitle.textContent = titles[target] || 'PromtLab';
+    viewport.scrollTop = 0;
+    closeDrawer();
+  }
+
+  drawerItems.forEach(item => {
+    item.addEventListener('click', () => goTo(item.dataset.target));
   });
+
+  function toggleTheme() {
+    screen.classList.toggle('light');
+    const on = screen.classList.contains('light');
+    document.querySelectorAll('.drawer-theme .switch').forEach(el => el.classList.toggle('on', on));
+    document.getElementById('quickTheme').textContent = on ? '🌙' : '☀️';
+  }
+
+  document.getElementById('quickTheme').addEventListener('click', toggleTheme);
+  document.querySelector('.drawer-theme').addEventListener('click', toggleTheme);
 
   document.getElementById('themeBtn').addEventListener('click', (e) => {
     screen.classList.toggle('light');
